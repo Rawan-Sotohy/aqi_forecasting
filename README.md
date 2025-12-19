@@ -25,9 +25,8 @@ This system analyzes historical air quality data and predicts future PM2.5 conce
 -  **LSTM-based time series forecasting** for air quality prediction
 -  **30-day lookback window** for sequential pattern learning
 -  **Single pollutant focus** (O3/NO2/CO concentration)
--  **Interactive Streamlit web interface** with 3 input modes
+-  **Interactive Streamlit web interface** with 2 input modes
 -  **Multi-step forecasting** (1-14 days ahead)
--  **Comprehensive data visualization** (EDA, training history, predictions)
 -  **Model performance tracking** (MAE, RMSE, R² metrics)
 -  **CSV upload support** for custom data forecasting
 -  **Demo mode** with sample data generation
@@ -44,7 +43,8 @@ aqi_forecasting/
 │
 ├── models/
 │   ├── best_lstm_model.h5       
-│   ├── scaler.pkl                   
+│   ├── scaler.pkl
+│   ├── state_encoder.pkl                  
 │   └── metrics.json                  
 │
 ├── app/               
