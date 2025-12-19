@@ -102,6 +102,17 @@ with st.sidebar:
         st.metric("R²", f"{tm.get('r2', 0):.4f}")
         st.metric("MAE", f"{tm.get('mae', 0):.4f}")
         st.metric("RMSE", f"{tm.get('rmse', 0):.4f}")
+        st.markdown("---")
+with st.sidebar:
+    st.markdown("### 📊 AQI Categories")
+    st.markdown("""
+    - **Good 🌿:** 0 - 50  
+    - **Moderate 🌤️:** 51 - 100  
+    - **Unhealthy (Sensitive) ⚠️:** 101 - 150  
+    - **Unhealthy 🚨:** 151 - 200  
+    - **Very Unhealthy 🛑:** 201 - 300  
+    - **Hazardous ☠️:** 301+  
+    """)
 
 # ===========================
 # TABS FOR INPUT
@@ -215,4 +226,4 @@ if st.button("🚀 Forecast", type="primary"):
 # FOOTER
 # ===========================
 st.markdown("---")
-st.markdown("<p style='text-align:center;color:#555;'>Under the supervision of Engineer: <span style='color:#FF69B4;'>Habiba💖</span></p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center;color:#555;'>Under the supervision of Engineer: <span style='color:#FF69B4;'>Habiba💖💖💖</span></p>", unsafe_allow_html=True)
