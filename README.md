@@ -24,7 +24,7 @@ This system analyzes historical air quality data and predicts future PM2.5 conce
 
 -  **LSTM-based time series forecasting** for air quality prediction
 -  **30-day lookback window** for sequential pattern learning
--  **Single pollutant focus** (O3/NO2/CO concentration)
+-  **Single pollutant focus** (O3 concentration)
 -  **Interactive Streamlit web interface** with 2 input modes
 -  **Multi-step forecasting** (1-14 days ahead)
 -  **Model performance tracking** (MAE, RMSE, R² metrics)
@@ -38,7 +38,6 @@ This system analyzes historical air quality data and predicts future PM2.5 conce
 ```
 aqi_forecasting/
 │                 
-│
 ├── notebook.ipynb    
 │
 ├── models/
@@ -48,7 +47,7 @@ aqi_forecasting/
 │   └── metrics.json                  
 │
 ├── app/               
-│   └── streamlit_app.py         
+│   └── app.py         
 │              
 ├── requirements.txt                  
 └── README.md                         
@@ -60,7 +59,7 @@ aqi_forecasting/
 
 You can try the web application here:
 
-Air Quality (AQI) Forecasting App 👉 [Live Demo](https://)
+Air Quality (AQI) Forecasting App 👉 [Live Demo](https://aqiforecasting-68zsai9abvpjnbbgafzho4.streamlit.app/)
 
 ---
 
