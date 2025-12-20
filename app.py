@@ -208,52 +208,17 @@ if st.button("🚀 Forecast", type="primary"):
         })
 
         # Display results
-        col1, col2 = st.columns([1, 2])
+        st.markdown("### 📋 Forecast Results")
+        st.dataframe(df_res, use_container_width=True)
+        
+        # Summary statistics
+        col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown("### 📋 Forecast Results")
-            st.dataframe(df_res, use_container_width=True)
-            
-            # Summary statistics
-            st.markdown("### 📊 Summary")
             st.metric("Average Prediction", f"{np.mean(preds_original):.2f} ppm")
-            st.metric("Min Value", f"{np.min(preds_original):.2f} ppm")
-            st.metric("Max Value", f"{np.max(preds_original):.2f} ppm")
-            
         with col2:
-            st.markdown("### 📈 Visualization")
-            fig = go.Figure()
-            
-            # Historical data
-            fig.add_trace(go.Scatter(
-                x=list(range(1, WINDOW_SIZE + 1)), 
-                y=values,
-                mode="lines+markers", 
-                name="Historical Data",
-                line=dict(color="#2E86AB", width=2), 
-                marker=dict(size=6)
-            ))
-            
-            # Forecasted data
-            fig.add_trace(go.Scatter(
-                x=list(range(WINDOW_SIZE + 1, WINDOW_SIZE + forecast_days + 1)), 
-                y=preds_original,
-                mode="lines+markers", 
-                name="Forecast",
-                line=dict(color="#F18F01", width=3, dash="dash"), 
-                marker=dict(size=8)
-            ))
-            
-            # Vertical line separating historical and forecast
-            fig.add_vline(x=WINDOW_SIZE + 0.5, line_dash="dot", line_color="gray", 
-                         annotation_text="Forecast Start", annotation_position="top")
-            
-            fig.update_layout(
-                xaxis_title="Days", 
-                yaxis_title=f"{TARGET} (ppm)", 
-                height=400,
-                hovermode='x unified'
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            st.metric("Min Value", f"{np.min(preds_original):.2f} ppm")
+        with col3:
+            st.metric("Max Value", f"{np.max(preds_original):.2f} ppm")
 
     except Exception as e:
         st.error(f"❌ Error: {str(e)}")
