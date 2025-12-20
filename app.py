@@ -168,6 +168,10 @@ if st.button("🚀 Forecast", type="primary"):
             st.error(f"Need exactly {WINDOW_SIZE} values, got {len(values)}")
             st.stop()
 
+        # Debug info
+        st.info(f"📊 Input range: {values.min():.2f} - {values.max():.2f} ppm")
+        st.info(f"🔧 Scaler range: {scaler.data_min_[0]:.2f} - {scaler.data_max_[0]:.2f}")
+        
         # Scale input values
         scaled = scaler.transform(values.reshape(-1, 1)).flatten()
         sequence = scaled
@@ -179,8 +183,13 @@ if st.button("🚀 Forecast", type="primary"):
             preds_scaled.append(pred)
             sequence = np.append(sequence[1:], pred)
 
-        # ✅ Inverse transform to get original scale predictions
-        preds_original = scaler.inverse_transform(np.array(preds_scaled).reshape(-1, 1)).flatten()
+        # ✅ CRITICAL: Inverse transform to get original scale predictions
+        preds_scaled_array = np.array(preds_scaled).reshape(-1, 1)
+        preds_original = scaler.inverse_transform(preds_scaled_array).flatten()
+        
+        # Debug: Print to verify transformation
+        print(f"Scaled predictions: {preds_scaled[:3]}")
+        print(f"Original predictions: {preds_original[:3]}")
 
         # Classification function for air quality status
         def classify(val):
