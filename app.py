@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 # ===========================
 st.set_page_config(page_title="AQI Forecasting", page_icon="🌤️", layout="wide")
 st.markdown("<h1 style='text-align:center; color:#70B7FF;'>🌤️ Air Quality Forecasting</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center;'>Predict future air pollution</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center;'>Predict future air pollution levels</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # ===========================
@@ -129,8 +129,8 @@ with tab1:
             vals = df[TARGET].dropna().values[-WINDOW_SIZE:]
             if len(vals) >= WINDOW_SIZE:
                 csv_input = ", ".join([str(round(v, 2)) for v in vals])
-                csv_input = st.text_area("Values", value=csv_input, height=100, key="csv")
-                csv_days = st.slider("Days", 1, 14, 7, key="csv_days")
+                csv_input = st.text_area("Historical Values (Last 30 days)", value=csv_input, height=100, key="csv")
+                csv_days = st.slider("Forecast Days", 1, 14, 7, key="csv_days")
             else:
                 st.error(f"Need {WINDOW_SIZE} values")
                 csv_input = None
@@ -138,14 +138,14 @@ with tab1:
             st.error(f"Column '{TARGET}' not found")
             csv_input = None
     else:
-        st.info("Upload CSV")
+        st.info("Upload CSV file with pollution data")
         csv_input = None
 
 with tab2:
     st.subheader("📝 Manual Input")
     demo_vals = ", ".join([str(round(40 + np.random.randn() * 5, 2)) for _ in range(WINDOW_SIZE)])
-    demo_input = st.text_area("Values", value=demo_vals, height=100, key="demo")
-    demo_days = st.slider("Days", 1, 14, 7, key="demo_days")
+    demo_input = st.text_area("Historical Values (Last 30 days)", value=demo_vals, height=100, key="demo")
+    demo_days = st.slider("Forecast Days", 1, 14, 7, key="demo_days")
 
 # ===========================
 # SELECT INPUT
@@ -162,9 +162,10 @@ else:
 # ===========================
 if st.button("🚀 Forecast", type="primary"):
     try:
+        # Parse input values
         values = np.array([float(x.strip()) for x in input_vals.split(",")])
         if len(values) != WINDOW_SIZE:
-            st.error(f"Need {WINDOW_SIZE} values, got {len(values)}")
+            st.error(f"Need exactly {WINDOW_SIZE} values, got {len(values)}")
             st.stop()
 
         # Scale input values
@@ -172,16 +173,16 @@ if st.button("🚀 Forecast", type="primary"):
         sequence = scaled
         preds_scaled = []
 
-        # Predict for each day
+        # Predict for each future day
         for _ in range(forecast_days):
             pred = model.predict(sequence.reshape(1, WINDOW_SIZE, 1), verbose=0)[0, 0]
             preds_scaled.append(pred)
             sequence = np.append(sequence[1:], pred)
 
-        # Inverse transform to get original scale
+        # ✅ Inverse transform to get original scale predictions
         preds_original = scaler.inverse_transform(np.array(preds_scaled).reshape(-1, 1)).flatten()
 
-        # Classification function
+        # Classification function for air quality status
         def classify(val):
             if val <= 50: return "Good 🌿"
             elif val <= 100: return "Moderate 🌤️"
@@ -190,40 +191,66 @@ if st.button("🚀 Forecast", type="primary"):
             elif val <= 300: return "Very Unhealthy 🛑"
             else: return "Hazardous ☠️"
 
-        # Results DataFrame
+        # Results DataFrame - Displaying original scale values (not scaled)
         df_res = pd.DataFrame({
             "Day": [f"Day {i+1}" for i in range(forecast_days)],
-            "O3 Mean(After Scaling)": [f"{p:.2f}" for p in preds_original],
-            "Status": [classify(float(p)) for p in preds_original]
+            "O3 Mean (ppm)": [f"{p:.2f}" for p in preds_original],  # ✅ Original scale values
+            "Air Quality Status": [classify(float(p)) for p in preds_original]
         })
 
         # Display results
         col1, col2 = st.columns([1, 2])
         with col1:
-            st.markdown("### 📋 Results")
+            st.markdown("### 📋 Forecast Results")
             st.dataframe(df_res, use_container_width=True)
+            
+            # Summary statistics
+            st.markdown("### 📊 Summary")
+            st.metric("Average Prediction", f"{np.mean(preds_original):.2f} ppm")
+            st.metric("Min Value", f"{np.min(preds_original):.2f} ppm")
+            st.metric("Max Value", f"{np.max(preds_original):.2f} ppm")
+            
         with col2:
             st.markdown("### 📈 Visualization")
             fig = go.Figure()
+            
+            # Historical data
             fig.add_trace(go.Scatter(
-                x=list(range(1, WINDOW_SIZE + 1)), y=values,
-                mode="lines+markers", name="Historical",
-                line=dict(color="#2E86AB", width=2), marker=dict(size=6)
+                x=list(range(1, WINDOW_SIZE + 1)), 
+                y=values,
+                mode="lines+markers", 
+                name="Historical Data",
+                line=dict(color="#2E86AB", width=2), 
+                marker=dict(size=6)
             ))
+            
+            # Forecasted data
             fig.add_trace(go.Scatter(
-                x=list(range(WINDOW_SIZE + 1, WINDOW_SIZE + forecast_days + 1)), y=preds_original,
-                mode="lines+markers", name="Forecast",
-                line=dict(color="#F18F01", width=3, dash="dash"), marker=dict(size=8)
+                x=list(range(WINDOW_SIZE + 1, WINDOW_SIZE + forecast_days + 1)), 
+                y=preds_original,
+                mode="lines+markers", 
+                name="Forecast",
+                line=dict(color="#F18F01", width=3, dash="dash"), 
+                marker=dict(size=8)
             ))
-            fig.add_vline(x=WINDOW_SIZE + 0.5, line_dash="dot", line_color="gray")
-            fig.update_layout(xaxis_title="Days", yaxis_title=f"{TARGET} (ppm)", height=400)
+            
+            # Vertical line separating historical and forecast
+            fig.add_vline(x=WINDOW_SIZE + 0.5, line_dash="dot", line_color="gray", 
+                         annotation_text="Forecast Start", annotation_position="top")
+            
+            fig.update_layout(
+                xaxis_title="Days", 
+                yaxis_title=f"{TARGET} (ppm)", 
+                height=400,
+                hovermode='x unified'
+            )
             st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
-        st.error(f"❌ {str(e)}")
+        st.error(f"❌ Error: {str(e)}")
 
 # ===========================
 # FOOTER
 # ===========================
 st.markdown("---")
-st.markdown("<p style='text-align:center;color:#555;'>Under the supervision of Engineer: <span style='color:#FF69B4;'>Habiba💖💖💖</span></p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center;color:#555;'>Developed under the supervision of Engineer: <span style='color:#FF69B4;'>Habiba💖💖💖</span></p>", unsafe_allow_html=True)
