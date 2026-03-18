@@ -63,12 +63,4 @@ Air Quality (AQI) Forecasting App 👉 [Live Demo](https://aqiforecasting-68zsai
 
 ---
 
-## 👥 Authors & Contributors
-
-- [Jannah Ayman](https://github.com/jannah-ayman)
-- [Rawan Sotohy](https://github.com/Rawan-Sotohy)
-- [Nancy Saad](https://github.com/nancyabdelbaryy)
-
----
-
 **Happy Forecasting! 🌍**
